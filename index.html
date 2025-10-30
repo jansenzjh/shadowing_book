@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowing Textbook</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+        }
+        #nav {
+            margin-bottom: 20px;
+        }
+        #nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #nav a {
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: block;
+        }
+        #nav a:hover {
+            background-color: #0056b3;
+        }
+        #content {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>Shadowing Textbook</h1>
+        </header>
+        <nav id="nav">
+            <h2>Units</h2>
+            <ul>
+                <li><a href="#" onclick="loadUnit(2); return false;">Unit 2</a></li>
+                <li><a href="#" onclick="loadUnit(3); return false;">Unit 3</a></li>
+                <li><a href="#" onclick="loadUnit(4); return false;">Unit 4</a></li>
+                <li><a href="#" onclick="loadUnit(5); return false;">Unit 5</a></li>
+                <li><a href="#" onclick="loadUnit(6); return false;">Unit 6</a></li>
+                <li><a href="#" onclick="loadUnit(7); return false;">Unit 7</a></li>
+                <li><a href="#" onclick="loadUnit(8); return false;">Unit 8</a></li>
+            </ul>
+        </nav>
+        <main id="content">
+            <p>Select a unit to start.</p>
+        </main>
+    </div>
+
+    <script>
+        const unitMp3Map = {
+            2: { start: 9, end: 17 },
+            3: { start: 18, end: 26 },
+            4: { start: 27, end: 38 },
+            5: { start: 39, end: 47 },
+            6: { start: 48, end: 56 },
+            7: { start: 57, end: 64 },
+            8: { start: 65, end: 74 },
+        };
+
+        async function loadUnit(unitNumber) {
+            const contentDiv = document.getElementById('content');
+            try {
+                const response = await fetch(`unit${unitNumber}.md`);
+                if (!response.ok) {
+                    contentDiv.innerHTML = `<p>Error loading unit ${unitNumber}. Make sure the file unit${unitNumber}.md exists.</p>`;
+                    return;
+                }
+                let markdown = await response.text();
+
+                const mp3Range = unitMp3Map[unitNumber];
+                if (mp3Range) {
+                    for (let i = mp3Range.start; i <= mp3Range.end; i++) {
+                        const mp3Number = i.toString().padStart(2, '0');
+                        const regex = new RegExp(`(\*\*${mp3Number}\*\*)`, 'g');
+                        const replacement = `$1<br><audio controls src="audio/${mp3Number}.mp3"></audio>`;
+                        markdown = markdown.replace(regex, replacement);
+                    }
+                }
+
+                contentDiv.innerHTML = marked.parse(markdown);
+            } catch (error) {
+                console.error('Error loading unit:', error);
+                contentDiv.innerHTML = '<p>There was an error loading the unit.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
